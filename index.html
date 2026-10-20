@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Aptitude test: 25 questions, 20 minutes</title>
+<title>Aptitude test: 25 questions, 15 minutes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -85,6 +85,16 @@ button{touch-action:manipulation}
 .done-mark.bad{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
 .done-mark svg{width:28px;height:28px}
 .intro .done-mark + h1{margin-top:20px}
+.tally{display:grid;grid-template-columns:1.5fr repeat(3,1fr);border-top:2px solid var(--ink);margin:4px 0 28px;max-width:40em}
+.tally div{padding:16px 16px 0 0}
+.tally b{display:block;font-family:var(--serif);font-weight:500;font-size:44px;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.tally .total b{color:var(--cobalt);font-size:56px}
+.tally span{color:var(--graphite);font-size:15px;line-height:1.35;display:block}
+@media (max-width:640px){
+  .tally{grid-template-columns:repeat(3,1fr)}
+  .tally .total{grid-column:1/-1;padding-bottom:6px}
+  .tally b{font-size:34px}
+}
 .status{border-left:4px solid var(--rule);padding:4px 0 4px 16px;margin:0 0 28px;max-width:36em;font-size:17px}
 .status.ok{border-color:var(--green)} .status.bad{border-color:var(--red);color:var(--red)}
 
@@ -196,11 +206,11 @@ body.testing::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-ar
 <div id="app"></div>
 <script>
 (function(){
-const DURATION = 20 * 60 * 1000;
+const DURATION = 15 * 60 * 1000;
 const KEY = "aptitude-test-v1";
 /* Google Apps Script web app URL (ends in /exec). See aptitude_mailer.gs for setup. */
-/* Bump together with KEY_VERSION in aptitude_mailer.gs whenever questions change. */
-const KEY_VERSION = 2;
+/* Bump together with KEY_VERSION in aptitude_mailer.gs whenever questions, timing or scoring change. */
+const KEY_VERSION = 3;
 const MAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
 
 /* ---------- drawing helpers ---------- */
@@ -343,7 +353,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 
 /* ---------- state ---------- */
 function fresh(){ return {phase:"intro", cand:null, startedAt:null, finishedAt:null, answers:{}, flags:{}, spent:{}, cur:0, viewStart:null, reason:null,
-  id:null, attempt:0, away:{n:0,ms:0}, hiddenAt:null, reloads:0, sent:false}; }
+  id:null, attempt:0, away:{n:0,ms:0}, hiddenAt:null, reloads:0, sent:false, result:null}; }
 function load(){ try{ const v=localStorage.getItem(KEY); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = Object.assign(fresh(), load() || {});
@@ -388,18 +398,20 @@ function payload(){
   };
 }
 
-/* no-cors means we can't read the reply, so a resolved fetch counts as delivered; a network failure
-   leaves S.sent false and we retry on the next page load or when the connection comes back. */
+/* The Apps Script allows cross-origin reads, so the submit reply (the candidate's totals) can be read.
+   Any failure leaves S.sent false and we retry on the next page load or when the connection comes back;
+   the script recognises a repeated submission and replies with the same totals. */
 function post(body){
   if(!MAIL_ENDPOINT){ console.warn("MAIL_ENDPOINT is not set; nothing was sent."); return Promise.reject(new Error("no endpoint")); }
-  return fetch(MAIL_ENDPOINT,{method:"POST", mode:"no-cors", keepalive:true,
+  return fetch(MAIL_ENDPOINT,{method:"POST", keepalive:true,
     headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
 }
 function sendResult(){
   if(S.phase!=="done"||S.sent||sending||!S.cand) return;
   sending=true; sendFailed=false;
   post(payload())
-    .then(()=>{ S.sent=true; save(); })
+    .then(r=>r.json())
+    .then(res=>{ if(!res||!res.ok) throw new Error("rejected"); S.sent=true; S.result=res; save(); })
     .catch(()=>{ sendFailed=true; })
     .finally(()=>{ sending=false; if(S.phase==="done") render(); });
 }
@@ -428,12 +440,13 @@ function renderIntro(){
   document.body.classList.remove("testing");
   app.innerHTML=`<div class="wrap intro">
   ${BRAND}
-  <h1>Twenty-five questions. Twenty minutes.</h1>
+  <h1>Twenty-five questions. Fifteen minutes.</h1>
   <p class="lede">A short reasoning test across numbers, logic, chance and shapes. No specialist knowledge is needed beyond basic arithmetic and fractions.</p>
-  <div class="facts"><div><b>25</b><span>questions</span></div><div><b>20:00</b><span>hard time limit</span></div><div><b>1</b><span>point each, no penalty for wrong answers</span></div></div>
+  <div class="facts"><div><b>25</b><span>questions</span></div><div><b>15:00</b><span>hard time limit</span></div><div><b>+1 / −½</b><span>for each right / wrong answer; skips score 0</span></div></div>
   <ul class="rules">
     <li>The clock starts when you submit your details below and doesn’t stop. When it reaches zero, your answers are submitted as they are.</li>
     <li>You can skip any question and come back to it from the numbered grid below each question. Tap a selected answer again to clear it.</li>
+    <li><strong>Negative marking:</strong> each correct answer scores 1 point and each wrong answer loses 0.5 points. A skipped question scores 0, so think before you guess.</li>
     <li>Every question is worth the same. Spend your time where it earns the most.</li>
     <li>Work in your head or on scrap paper. No calculators.</li>
   </ul>
@@ -443,7 +456,7 @@ function renderIntro(){
     <div class="field" data-f="email"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required><div class="err"></div></div>
     <div class="field" data-f="linkedin"><label for="f-li">LinkedIn profile link</label><input id="f-li" name="linkedin" type="url" placeholder="https://www.linkedin.com/in/your-name" required><div class="err"></div></div>
     <div class="field" data-f="phone"><label for="f-phone">Phone number</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567" required><div class="err"></div></div>
-    <label class="ready"><input type="checkbox" id="f-ready"><span>Yes, I have 20 minutes without any distraction and I am ready to start my evaluation step 1.</span></label>
+    <label class="ready"><input type="checkbox" id="f-ready"><span>Yes, I have 15 minutes without any distraction and I am ready to start my evaluation step 1.</span></label>
     <button class="btn" id="go" type="submit" disabled>Submit and start</button>
   </form>
   </div>`;
@@ -505,6 +518,8 @@ function renderTest(){
 function renderDone(){
   document.body.classList.remove("testing");
   const answered=Object.keys(S.answers).length;
+  const R = S.result && S.result.correct!=null ? S.result : null;
+  const num = n => (n<0?"−":"")+Math.abs(n);
   const st = S.sent ? "ok" : sendFailed ? "bad" : "";
   const status = S.sent ? "Your answers have been received. You can close this page."
     : sendFailed ? "We couldn’t reach our server. Check your connection and keep this page open; we’ll retry automatically. If it still fails, reopen this page later on the same device."
@@ -515,7 +530,13 @@ function renderDone(){
     <div class="done-mark ${st}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></div>
     <h1>Thank you${S.cand?`, ${esc(S.cand.name.split(/\s+/)[0])}`:""}.</h1>
     <p class="lede">${S.reason==="time"?"Time ran out, so your answers were submitted automatically.":"You submitted your answers before time ran out."}
-    You answered ${answered} of ${Q.length} questions.</p>
+    ${R?"":`You answered ${answered} of ${Q.length} questions.`}</p>
+    ${R?`<div class="tally" aria-label="Your result">
+      <div class="total"><b>${num(R.score)}</b><span>score out of ${R.total}</span></div>
+      <div><b>${R.correct}</b><span>correct, +1 each</span></div>
+      <div><b>${R.incorrect}</b><span>wrong, −${R.penalty} each</span></div>
+      <div><b>${R.skipped}</b><span>skipped, 0 each</span></div>
+    </div>`:""}
     <p class="status ${st}" role="status">${status}</p>
     <p class="lede">The Hunar.ai team will review your result and get in touch about next steps.</p>
   </div>`;
