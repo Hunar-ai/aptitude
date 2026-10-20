@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Aptitude test: 25 questions, 15 minutes</title>
+<title>Aptitude test: 25 questions, 20 minutes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -206,11 +206,11 @@ body.testing::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-ar
 <div id="app"></div>
 <script>
 (function(){
-const DURATION = 15 * 60 * 1000;
+const DURATION = 20 * 60 * 1000;
 const KEY = "aptitude-test-v1";
 /* Google Apps Script web app URL (ends in /exec). See aptitude_mailer.gs for setup. */
 /* Bump together with KEY_VERSION in aptitude_mailer.gs whenever questions, timing or scoring change. */
-const KEY_VERSION = 3;
+const KEY_VERSION = 4;
 const MAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
 
 /* ---------- drawing helpers ---------- */
@@ -440,9 +440,9 @@ function renderIntro(){
   document.body.classList.remove("testing");
   app.innerHTML=`<div class="wrap intro">
   ${BRAND}
-  <h1>Twenty-five questions. Fifteen minutes.</h1>
+  <h1>Twenty-five questions. Twenty minutes.</h1>
   <p class="lede">A short reasoning test across numbers, logic, chance and shapes. No specialist knowledge is needed beyond basic arithmetic and fractions.</p>
-  <div class="facts"><div><b>25</b><span>questions</span></div><div><b>15:00</b><span>hard time limit</span></div><div><b>+1 / −½</b><span>for each right / wrong answer; skips score 0</span></div></div>
+  <div class="facts"><div><b>25</b><span>questions</span></div><div><b>20:00</b><span>hard time limit</span></div><div><b>+1 / −½</b><span>for each right / wrong answer; skips score 0</span></div></div>
   <ul class="rules">
     <li>The clock starts when you submit your details below and doesn’t stop. When it reaches zero, your answers are submitted as they are.</li>
     <li>You can skip any question and come back to it from the numbered grid below each question. Tap a selected answer again to clear it.</li>
@@ -456,7 +456,7 @@ function renderIntro(){
     <div class="field" data-f="email"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required><div class="err"></div></div>
     <div class="field" data-f="linkedin"><label for="f-li">LinkedIn profile link</label><input id="f-li" name="linkedin" type="url" placeholder="https://www.linkedin.com/in/your-name" required><div class="err"></div></div>
     <div class="field" data-f="phone"><label for="f-phone">Phone number</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567" required><div class="err"></div></div>
-    <label class="ready"><input type="checkbox" id="f-ready"><span>Yes, I have 15 minutes without any distraction and I am ready to start my evaluation step 1.</span></label>
+    <label class="ready"><input type="checkbox" id="f-ready"><span>Yes, I have 20 minutes without any distraction and I am ready to start my evaluation step 1.</span></label>
     <button class="btn" id="go" type="submit" disabled>Submit and start</button>
   </form>
   </div>`;
