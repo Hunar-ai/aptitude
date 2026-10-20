@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aptitude test: 25 questions, 20 minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9EDF1; --sheet:#F8FAFB; --ink:#18212C; --graphite:#5A6573; --rule:#CBD3DC;
+  --cobalt:#2A44C9; --cobalt-soft:#DCE2FA; --amber:#B86E00; --red:#B3261E; --green:#1F7A4D;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1318; --sheet:#171C23; --ink:#E3E8EE; --graphite:#94A0AE; --rule:#2A323D;
+    --cobalt:#8DA0FF; --cobalt-soft:#232C4D; --amber:#F0A43A; --red:#FF7A70; --green:#5FD39A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1318; --sheet:#171C23; --ink:#E3E8EE; --graphite:#94A0AE; --rule:#2A323D;
+  --cobalt:#8DA0FF; --cobalt-soft:#232C4D; --amber:#F0A43A; --red:#FF7A70; --green:#5FD39A;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+/* intro */
+.intro{padding:56px 0 64px}
+.intro h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px,7vw,68px);line-height:1.02;letter-spacing:-.02em;margin:0 0 20px;max-width:14ch}
+.intro .lede{font-family:var(--serif);font-size:21px;line-height:1.55;color:var(--graphite);max-width:36em;margin:0 0 36px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--ink);margin-bottom:36px}
+.facts div{padding:16px 16px 16px 0}
+.facts b{display:block;font-family:var(--serif);font-weight:500;font-size:44px;line-height:1}
+.facts span{color:var(--graphite);font-size:15px}
+.rules{margin:0 0 40px;padding:0;list-style:none;max-width:38em}
+.rules li{padding:12px 0;border-bottom:1px solid var(--rule)}
+.form{max-width:34em;border-top:2px solid var(--ink);padding-top:28px;margin-top:8px}
+.form h2{font-family:var(--serif);font-weight:500;font-size:28px;margin:0 0 18px}
+.field{margin-bottom:18px}
+.field label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+.field input{width:100%;font:inherit;color:var(--ink);background:var(--sheet);border:1.5px solid var(--rule);border-radius:6px;padding:11px 13px}
+.field input:focus{border-color:var(--cobalt);outline:none;box-shadow:0 0 0 3px var(--cobalt-soft)}
+.field.bad input{border-color:var(--red)}
+.field .err{color:var(--red);font-size:14px;margin-top:5px;min-height:0}
+.ready{display:flex;gap:12px;align-items:flex-start;background:var(--sheet);border:1.5px solid var(--rule);border-radius:8px;padding:14px 16px;margin:24px 0;cursor:pointer;font-size:17px}
+.ready input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--cobalt)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--ink);color:var(--sheet);padding:12px 22px;border-radius:6px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--cobalt);border-color:var(--cobalt)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--cobalt-soft);border-color:var(--cobalt)}
+.btn.warn{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* header */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--rule)}
+body.testing::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:12px;padding-bottom:10px}
+.clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:28px;letter-spacing:-.01em}
+.clock.low{color:var(--amber)}
+.clock.crit{color:var(--red)}
+.meta{color:var(--graphite);font-size:15px;text-align:right}
+.track{height:6px;background:var(--rule)}
+.fill{height:100%;background:var(--ink);transform-origin:left;transition:background .3s}
+.fill.low{background:var(--amber)}
+.fill.crit{background:var(--red)}
+
+/* question */
+.q{display:grid;grid-template-columns:76px 1fr;gap:0 8px;padding:36px 0 8px}
+.qnum{font-family:var(--serif);font-size:56px;line-height:.9;color:var(--graphite);font-weight:400}
+.cat{color:var(--graphite);font-size:14px;margin-bottom:8px}
+.prompt{font-family:var(--serif);font-size:22px;line-height:1.55;max-width:34em}
+.prompt p{margin:0 0 12px}
+.seq{font-family:var(--serif);font-size:30px;letter-spacing:.02em;margin:10px 0}
+.clues{margin:6px 0 12px;padding-left:1.4em;font-size:19px;line-height:1.5}
+.clues li{margin-bottom:2px}
+.fig{margin:14px 0 6px;overflow-x:auto}
+.fig svg{display:block;max-width:100%;height:auto}
+.opts{grid-column:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0 0}
+.opts.visual{grid-template-columns:repeat(4,1fr)}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:var(--sheet);border:1.5px solid var(--rule);border-radius:8px;padding:12px 14px;cursor:pointer;min-height:56px}
+.opt:hover{border-color:var(--graphite)}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--graphite);display:grid;place-items:center;font-size:14px;font-weight:600;color:var(--graphite)}
+.opt .t{font-size:18px}
+.opts.visual .opt{flex-direction:column;align-items:center;justify-content:center;padding:12px 8px}
+.opts.visual .opt svg{width:100%;max-width:110px;height:auto}
+.opt.sel{border-color:var(--cobalt);background:var(--cobalt-soft)}
+.opt.sel .k{background:var(--cobalt);border-color:var(--cobalt);color:var(--sheet)}
+
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:30px 0 22px;padding-left:84px}
+.ctrl .grp{display:flex;gap:10px;flex-wrap:wrap}
+.flagbtn.on{border-color:var(--amber);color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(13,1fr);gap:6px;padding:18px 0;border-top:1px solid var(--rule);margin-left:84px}
+.cell{aspect-ratio:1;border:1.5px solid var(--rule);background:transparent;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;color:var(--graphite);position:relative;padding:0}
+.cell.done{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.cell.cur{border-color:var(--cobalt);box-shadow:0 0 0 2px var(--cobalt)}
+.cell.flag::after{content:"";position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--amber)}
+.legend{margin-left:84px;color:var(--graphite);font-size:14px;padding-bottom:40px}
+.submitrow{margin-left:84px;padding:6px 0 60px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.submitrow .note{color:var(--graphite);font-size:15px}
+
+
+@media (max-width:640px){
+  .q{grid-template-columns:1fr;padding-top:24px}
+  .qnum{font-size:40px;margin-bottom:6px}
+  .opts{grid-column:1;grid-template-columns:1fr}
+  .opts.visual{grid-template-columns:1fr 1fr}
+  .ctrl,.grid,.legend,.submitrow{padding-left:0;margin-left:0}
+  .grid{grid-template-columns:repeat(9,1fr)}
+  .facts b{font-size:34px}
+  .prompt{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+const DURATION = 20 * 60 * 1000;
+const KEY = "aptitude-test-v1";
+/* Google Apps Script web app URL (ends in /exec). See aptitude_mailer.gs for setup. */
+const MAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
+
+/* ---------- drawing helpers ---------- */
+const norm = cs => { const mx=Math.min(...cs.map(c=>c[0])), my=Math.min(...cs.map(c=>c[1])); return cs.map(([x,y])=>[x-mx,y-my]); };
+const rot = (cs,k) => { let r=cs; for(let i=0;i<k;i++) r=r.map(([x,y])=>[-y,x]); return norm(r); };
+const mir = cs => norm(cs.map(([x,y])=>[-x,y]));
+function poly(cs, size){
+  size = size || 22; cs = norm(cs);
+  const w = Math.max(...cs.map(c=>c[0]))+1, h = Math.max(...cs.map(c=>c[1]))+1;
+  const W = 5*size, pad = (W - w*size)/2, padY = (W - h*size)/2;
+  const rects = cs.map(([x,y])=>`<rect x="${pad+x*size}" y="${padY+y*size}" width="${size}" height="${size}" fill="var(--cobalt)" stroke="var(--sheet)" stroke-width="2"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${W}" width="${W}" height="${W}" role="img" aria-label="shape">${rects}</svg>`;
+}
+function shapeAt(kind, cx, cy, r){
+  if(kind==="circle") return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--ink)"/>`;
+  if(kind==="square") return `<rect x="${cx-r}" y="${cy-r}" width="${2*r}" height="${2*r}" fill="var(--ink)"/>`;
+  return `<polygon points="${cx},${cy-r} ${cx+r},${cy+r*.85} ${cx-r},${cy+r*.85}" fill="var(--ink)"/>`;
+}
+function cellContent(kind, n, ox, oy, S){
+  const r = S*0.11, xs = n===1?[.5]:n===2?[.32,.68]:[.2,.5,.8];
+  return xs.map(f=>shapeAt(kind, ox+f*S, oy+S/2, r)).join("");
+}
+function matrix(){
+  const S=90, data=[[["circle",1],["square",2],["triangle",3]],[["triangle",2],["circle",3],["square",1]],[["square",3],["triangle",1],null]];
+  let out=`<svg viewBox="0 0 ${3*S+4} ${3*S+4}" width="${3*S+4}" height="${3*S+4}" role="img" aria-label="3 by 3 grid with the last cell missing">`;
+  data.forEach((row,ri)=>row.forEach((c,ci)=>{
+    const x=2+ci*S, y=2+ri*S;
+    out+=`<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="var(--sheet)" stroke="var(--rule)" stroke-width="2"/>`;
+    out+= c ? cellContent(c[0],c[1],x,y,S) : `<text x="${x+S/2}" y="${y+S/2+12}" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-size="36" fill="var(--graphite)">?</text>`;
+  }));
+  return out+"</svg>";
+}
+function matCell(kind,n){ const S=90; return `<svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}"><rect x="1" y="1" width="${S-2}" height="${S-2}" fill="none" stroke="var(--rule)" stroke-width="2"/>${cellContent(kind,n,0,0,S)}</svg>`; }
+function frame(dir, filled, q){
+  const s=70;
+  if(q) return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}"><rect x="2" y="2" width="${s-4}" height="${s-4}" rx="4" fill="none" stroke="var(--graphite)" stroke-width="2" stroke-dasharray="5 4"/><text x="${s/2}" y="${s/2+11}" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-size="30" fill="var(--graphite)">?</text></svg>`;
+  return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}"><rect x="2" y="2" width="${s-4}" height="${s-4}" rx="4" fill="var(--sheet)" stroke="var(--rule)" stroke-width="2"/>
+  <g transform="rotate(${dir*90} 35 35)" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M35 54 L35 16 M24 27 L35 16 L46 27"/></g>
+  <circle cx="56" cy="56" r="6" fill="${filled?"var(--ink)":"none"}" stroke="var(--ink)" stroke-width="2.5"/></svg>`;
+}
+const row = items => `<div class="fig"><svg viewBox="0 0 ${items.length*80} 70" width="${items.length*80}" height="70">${items.map((it,i)=>`<g transform="translate(${i*80} 0)">${it.replace(/^<svg[^>]*>|<\/svg>$/g,"")}</g>`).join("")}</svg></div>`;
+
+const F=[[1,0],[2,0],[0,1],[1,1],[1,2]];
+const H=[[0,0],[1,0],[1,1],[1,2],[2,2],[1,3]];
+
+/* ---------- questions ---------- */
+const Q = [
+{cat:"Numerical", t:"Number series",
+ p:`<p>What number comes next?</p><div class="seq">2, 6, 12, 20, 30, ?</div>`,
+ o:["40","42","44","48"]},
+{cat:"Verbal", t:"Analogy",
+ p:`<p><em>Ephemeral</em> is to <em>permanent</em> as <em>verbose</em> is to:</p>`,
+ o:["Wordy","Eloquent","Concise","Loud"]},
+{cat:"Logical", t:"Syllogism",
+ p:`<p>All bloops are razzies. Some razzies are lazzies.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["Some bloops are lazzies","All lazzies are bloops","No bloops are lazzies","None of these must be true"]},
+{cat:"Spatial", t:"Rotation",
+ p:`<p>Three of the options are this shape turned in the plane. Which one can <em>not</em> be made by rotating it?</p><div class="fig">${poly(F)}</div>`,
+ o:[poly(rot(F,1)), poly(mir(rot(F,2))), poly(rot(F,3)), poly(rot(F,2))], visual:true},
+{cat:"Numerical", t:"Rates",
+ p:`<p>Pipe A fills a tank in 4 hours. Pipe B empties the full tank in 6 hours. With both open, how long does it take to fill the empty tank?</p>`,
+ o:["2 hours","5 hours","10 hours","12 hours"]},
+{cat:"Verbal", t:"Odd one out",
+ p:`<p>Which word does not belong with the others?</p>`,
+ o:["Square","Rhombus","Trapezoid","Kite","Triangle"]},
+{cat:"Abstract", t:"Matrix",
+ p:`<p>Which cell completes the grid?</p><div class="fig">${matrix()}</div>`,
+ o:[matCell("circle",3), matCell("circle",1), matCell("square",2), matCell("circle",2)], visual:true},
+{cat:"Verbal", t:"Coding",
+ p:`<p>In a code, <strong>MOUSE</strong> is written as <strong>NQXWJ</strong>. How is <strong>HORSE</strong> written?</p>`,
+ o:["IPTVF","IQUWJ","JQUWJ","IQUVJ"]},
+{cat:"Numerical", t:"Number series",
+ p:`<p>What number comes next?</p><div class="seq">3, 5, 9, 17, 33, ?</div>`,
+ o:["49","63","66","65"]},
+{cat:"Logical", t:"Ordering",
+ p:`<p>Five runners finish a race with no ties. Anna finishes before Ben. Carl finishes after Dana but before Anna. Eve finishes after Ben.</p><p>Who finishes third?</p>`,
+ o:["Dana","Carl","Anna","Ben"]},
+{cat:"Spatial", t:"Visualisation",
+ p:`<p>A 4 × 4 × 4 cube is painted on every face, then cut into 64 small cubes. How many small cubes have paint on <em>exactly one</em> face?</p>`,
+ o:["16","24","32","36"]},
+{cat:"Spatial", t:"Paper folding",
+ p:`<p>A square sheet of paper is folded in half, then in half again, then once more along a diagonal into a triangle. One hole is punched through all the layers, away from any fold. How many holes are there when the paper is opened?</p>`,
+ o:["4","6","8","16"]},
+{cat:"Verbal", t:"Analogy",
+ p:`<p><em>Odometer</em> is to <em>distance</em> as <em>compass</em> is to:</p>`,
+ o:["Speed","Direction","Needle","Hiking"]},
+{cat:"Numerical", t:"Summation",
+ p:`<p>What is the sum of all whole numbers from 1 to 500 that are divisible by 3 or by 7, but <em>not</em> by both?</p>`,
+ o:["47,685","47,883","48,216","46,953"]},
+{cat:"Spatial", t:"Clock",
+ p:`<p>What is the smaller angle between the hour and minute hands of a clock at 3:40?</p>`,
+ o:["120°","125°","130°","140°"]},
+{cat:"Spatial", t:"Transformation",
+ p:`<p>This shape is rotated 90° clockwise, then flipped left to right. Which option shows the result?</p><div class="fig">${poly(H)}</div>`,
+ o:[poly(rot(H,1)), poly(mir(rot(H,3))), poly(mir(rot(H,1))), poly(mir(H))], visual:true},
+{cat:"Numerical", t:"Averages",
+ p:`<p>The average of five numbers is 20. One number is removed and the average of the remaining four is 18. What number was removed?</p>`,
+ o:["22","26","28","30"]},
+{cat:"Verbal", t:"Word links",
+ p:`<p>Which word can go in front of each of these to make a common word?</p><div class="seq" style="font-size:24px">___light &nbsp; ___fall &nbsp; ___mare &nbsp; ___club</div>`,
+ o:["Night","Day","Star","Moon"]},
+{cat:"Logical", t:"Syllogism",
+ p:`<p>Some A are B. No B are C.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["Some C are B","No A are C","All C are A","Some A are not C"]},
+{cat:"Abstract", t:"Sequence",
+ p:`<p>Which frame comes next?</p>${row([frame(0,1),frame(1,0),frame(2,1),frame(3,0),frame(0,0,true)])}`,
+ o:[frame(0,0), frame(1,1), frame(0,1), frame(3,1)], visual:true},
+{cat:"Numerical", t:"Number series",
+ p:`<p>What number comes next?</p><div class="seq">1, 4, 27, 256, ?</div>`,
+ o:["625","1,024","4,096","3,125"]},
+{cat:"Logical", t:"Deduction",
+ p:`<p>Four friends (Ali, Bea, Cy and Di) live in four houses in a row, numbered 1 to 4 from left to right. Each house is a different colour (red, blue, green, yellow) and each friend owns a different pet (cat, dog, fish, bird).</p>
+ <ol class="clues">
+ <li>The red house is immediately left of the green house.</li>
+ <li>Ali doesn’t live at either end.</li>
+ <li>The cat owner lives at one end.</li>
+ <li>Bea lives immediately left of the dog owner.</li>
+ <li>The fish owner lives next to the red house.</li>
+ <li>Di owns neither the dog nor the bird.</li>
+ <li>Cy doesn’t live in the yellow house.</li>
+ <li>Ali doesn’t own the dog.</li>
+ <li>The bird owner doesn’t live next to the fish owner.</li>
+ <li>Di’s house isn’t yellow.</li>
+ <li>Bea doesn’t own the bird.</li>
+ </ol><p>Who owns the bird?</p>`,
+ o:["Ali","Bea","Cy","Di"]},
+{cat:"Numerical", t:"Ages",
+ p:`<p>A is twice as old as B was when A was as old as B is now. B is 30. How old is A?</p>`,
+ o:["35","40","45","60"]},
+{cat:"Verbal", t:"Inference",
+ p:`<p>All of the museum’s 19th-century paintings hang in the east wing. Some paintings in the east wing are by Dutch artists. The painting “Harbor” hangs in the west wing.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["“Harbor” is by a Dutch artist","“Harbor” is not a 19th-century painting","“Harbor” is not by a Dutch artist","Every Dutch painting is from the 19th century"]},
+{cat:"Spatial", t:"Mirror image",
+ p:`<p>An analogue clock seen in a mirror appears to read 2:25. What is the actual time?</p>`,
+ o:["10:35","9:25","9:35","3:35"]}
+];
+const LET="ABCDE";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- state ---------- */
+function fresh(){ return {phase:"intro", cand:null, startedAt:null, finishedAt:null, answers:{}, flags:{}, spent:{}, cur:0, viewStart:null, reason:null,
+  id:null, attempt:0, away:{n:0,ms:0}, hiddenAt:null, reloads:0, sent:false}; }
+function load(){ try{ const v=localStorage.getItem(KEY); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+let S = Object.assign(fresh(), load() || {});
+let ticker=null, confirmArm=false, sending=false, sendFailed=false;
+if(S.phase==="test"){
+  S.reloads++;
+  if(S.hiddenAt){ S.away.ms+=Date.now()-S.hiddenAt; S.hiddenAt=null; }
+  save();
+}
+
+const app = document.getElementById("app");
+const fmt = ms => { ms=Math.max(0,ms); const s=Math.ceil(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+const remaining = () => DURATION - (Date.now() - S.startedAt);
+
+function bank(){ if(S.viewStart!=null){ S.spent[S.cur]=(S.spent[S.cur]||0)+(Date.now()-S.viewStart); S.viewStart=Date.now(); } }
+function go(i){ if(i<0||i>=Q.length) return; bank(); S.cur=i; S.viewStart=Date.now(); confirmArm=false; save(); render(); window.scrollTo({top:0}); }
+function start(cand){
+  let attempts=0; try{ attempts=+localStorage.getItem(KEY+"-attempts")||0; localStorage.setItem(KEY+"-attempts", attempts+1); }catch(e){}
+  S=fresh(); S.cand=cand; S.phase="test"; S.startedAt=Date.now(); S.viewStart=Date.now();
+  S.attempt=attempts+1; S.id=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);
+  save(); render();
+  post({type:"start", id:S.id}).catch(()=>{});
+}
+function finish(reason){
+  bank(); S.viewStart=null; S.phase="done"; S.reason=reason;
+  if(S.hiddenAt){ S.away.ms+=Date.now()-S.hiddenAt; S.hiddenAt=null; }
+  S.finishedAt = Math.min(Date.now(), S.startedAt + DURATION); save(); render(); window.scrollTo({top:0});
+  sendResult();
+}
+
+/* Raw choices and timings only. Grading happens in the Apps Script, which holds the answer key. */
+function payload(){
+  let tz=""; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
+  return {
+    type:"submit", id:S.id, attempt:S.attempt, candidate:S.cand, reason:S.reason,
+    startedAt:new Date(S.startedAt).toISOString(), finishedAt:new Date(S.finishedAt).toISOString(),
+    answers:Q.map((_,i)=>S.answers[i]==null?null:S.answers[i]),
+    spent:Q.map((_,i)=>Math.round(S.spent[i]||0)),
+    flags:Q.map((_,i)=>!!S.flags[i]),
+    integrity:{tabSwitches:S.away.n, awayMs:Math.round(S.away.ms), reloads:S.reloads},
+    client:{userAgent:navigator.userAgent, timezone:tz}
+  };
+}
+
+/* no-cors means we can't read the reply, so a resolved fetch counts as delivered; a network failure
+   leaves S.sent false and we retry on the next page load or when the connection comes back. */
+function post(body){
+  if(!MAIL_ENDPOINT){ console.warn("MAIL_ENDPOINT is not set; nothing was sent."); return Promise.reject(new Error("no endpoint")); }
+  return fetch(MAIL_ENDPOINT,{method:"POST", mode:"no-cors", keepalive:true,
+    headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
+}
+function sendResult(){
+  if(S.phase!=="done"||S.sent||sending||!S.cand) return;
+  sending=true; sendFailed=false;
+  post(payload())
+    .then(()=>{ S.sent=true; save(); })
+    .catch(()=>{ sendFailed=true; })
+    .finally(()=>{ sending=false; if(S.phase==="done") render(); });
+}
+window.addEventListener("online", sendResult);
+document.addEventListener("visibilitychange",()=>{
+  if(S.phase!=="test") return;
+  if(document.hidden){ S.away.n++; S.hiddenAt=Date.now(); }
+  else if(S.hiddenAt){ S.away.ms+=Date.now()-S.hiddenAt; S.hiddenAt=null; }
+  save();
+});
+
+function tick(){
+  if(S.phase!=="test") return;
+  const r=remaining();
+  if(r<=0){ finish("time"); return; }
+  const c=document.getElementById("clock"), f=document.getElementById("fill");
+  if(!c) return;
+  c.textContent=fmt(r);
+  const cls = r<60000?"crit":r<180000?"low":"";
+  c.className="clock "+cls; f.className="fill "+cls;
+  f.style.transform=`scaleX(${r/DURATION})`;
+}
+
+/* ---------- views ---------- */
+function renderIntro(){
+  document.body.classList.remove("testing");
+  app.innerHTML=`<div class="wrap intro">
+  <h1>Twenty-five questions. Twenty minutes.</h1>
+  <p class="lede">A short reasoning test across numbers, words, logic and shapes. No knowledge is needed beyond basic arithmetic and everyday vocabulary.</p>
+  <div class="facts"><div><b>25</b><span>questions</span></div><div><b>20:00</b><span>hard time limit</span></div><div><b>1</b><span>point each, no penalty for wrong answers</span></div></div>
+  <ul class="rules">
+    <li>The clock starts when you submit your details below and doesn’t stop. When it reaches zero, your answers are submitted as they are.</li>
+    <li>You can skip any question and come back to it from the grid below each question.</li>
+    <li>Every question is worth the same. Spend your time where it earns the most.</li>
+    <li>Work in your head or on scrap paper. No calculators.</li>
+  </ul>
+  <form class="form" id="cand" novalidate>
+    <h2>Your details</h2>
+    <div class="field" data-f="name"><label for="f-name">Full name</label><input id="f-name" name="name" autocomplete="name" required><div class="err"></div></div>
+    <div class="field" data-f="email"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required><div class="err"></div></div>
+    <div class="field" data-f="linkedin"><label for="f-li">LinkedIn profile link</label><input id="f-li" name="linkedin" type="url" placeholder="https://www.linkedin.com/in/your-name" required><div class="err"></div></div>
+    <div class="field" data-f="phone"><label for="f-phone">Phone number</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567" required><div class="err"></div></div>
+    <label class="ready"><input type="checkbox" id="f-ready"><span>Yes, I have 20 minutes without any distraction and I am ready to start my evaluation step 1.</span></label>
+    <button class="btn" id="go" type="submit" disabled>Submit and start</button>
+  </form>
+  </div>`;
+  const form=document.getElementById("cand"), ready=document.getElementById("f-ready"), go=document.getElementById("go");
+  ready.onchange=()=>{ go.disabled=!ready.checked; };
+  const checks={
+    name:v=>v.trim().split(/\s+/).length>=2||"Enter your first and last name.",
+    email:v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())||"Enter a valid email address.",
+    linkedin:v=>/^(https?:\/\/)?([a-z]{2,3}\.)?linkedin\.com\/(in|pub)\/[^\s\/]+\/?$/i.test(v.trim())||"Enter a LinkedIn profile link, like linkedin.com/in/your-name.",
+    phone:v=>(v.replace(/\D/g,"").length>=7&&/^[+\d\s().-]+$/.test(v.trim()))||"Enter a phone number with at least 7 digits."
+  };
+  form.onsubmit=e=>{
+    e.preventDefault(); if(!ready.checked) return;
+    const data={}; let first=null;
+    Object.keys(checks).forEach(k=>{
+      const f=form.querySelector(`[data-f="${k}"]`), v=f.querySelector("input").value, r=checks[k](v);
+      f.classList.toggle("bad",r!==true); f.querySelector(".err").textContent=r===true?"":r;
+      if(r!==true&&!first) first=f.querySelector("input"); data[k]=v.trim();
+    });
+    if(first){ first.focus(); return; }
+    start(data); window.scrollTo({top:0});
+  };
+}
+
+function renderTest(){
+  document.body.classList.add("testing");
+  const q=Q[S.cur], sel=S.answers[S.cur], answered=Object.keys(S.answers).length;
+  const opts=q.o.map((o,i)=>`<button class="opt${sel===i?" sel":""}" data-i="${i}" aria-pressed="${sel===i}"><span class="k">${LET[i]}</span>${q.visual?o:`<span class="t">${o}</span>`}</button>`).join("");
+  const cells=Q.map((_,i)=>`<button class="cell${S.answers[i]!=null?" done":""}${i===S.cur?" cur":""}${S.flags[i]?" flag":""}" data-g="${i}" aria-label="Question ${i+1}">${i+1}</button>`).join("");
+  app.innerHTML=`
+  <div class="bar"><div class="wrap"><div class="clock" id="clock">--:--</div><div class="meta">${answered} of 25 answered</div></div><div class="track"><div class="fill" id="fill"></div></div></div>
+  <div class="wrap">
+    <div class="q">
+      <div class="qnum">${S.cur+1}</div>
+      <div><div class="cat">${q.cat}, ${q.t.toLowerCase()}</div><div class="prompt">${q.p}</div></div>
+      <div class="opts${q.visual?" visual":""}">${opts}</div>
+    </div>
+    <div class="ctrl">
+      <div class="grp"><button class="btn ghost" id="prev" ${S.cur===0?"disabled":""}>Previous</button>
+      <button class="btn ghost flagbtn${S.flags[S.cur]?" on":""}" id="flag">${S.flags[S.cur]?"Flagged":"Flag for review"}</button></div>
+      <div class="grp">${sel!=null?`<button class="btn ghost" id="clear">Clear answer</button>`:""}
+      <button class="btn" id="next" ${S.cur===Q.length-1?"disabled":""}>${sel!=null?"Next question":"Skip"}</button></div>
+    </div>
+    <div class="grid">${cells}</div>
+    <div class="legend">Filled squares are answered. An amber dot marks a flagged question.</div>
+    <div class="submitrow"><button class="btn ${confirmArm?"warn":"ghost"}" id="submit">${confirmArm?"Yes, submit now":"Submit answers"}</button>
+    <span class="note">${confirmArm?`${25-answered} unanswered. You can’t change answers after submitting.`:""}</span></div>
+  </div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ S.answers[S.cur]=+b.dataset.i; save(); render(); });
+  app.querySelectorAll(".cell").forEach(b=>b.onclick=()=>go(+b.dataset.g));
+  document.getElementById("prev").onclick=()=>go(S.cur-1);
+  document.getElementById("next").onclick=()=>go(S.cur+1);
+  document.getElementById("flag").onclick=()=>{ S.flags[S.cur]=!S.flags[S.cur]; save(); render(); };
+  const cl=document.getElementById("clear"); if(cl) cl.onclick=()=>{ delete S.answers[S.cur]; save(); render(); };
+  document.getElementById("submit").onclick=()=>{ if(confirmArm) finish("manual"); else { confirmArm=true; render(); } };
+  tick();
+}
+
+function renderDone(){
+  document.body.classList.remove("testing");
+  const answered=Object.keys(S.answers).length;
+  const status = S.sent ? "Your answers have been submitted. You can close this page."
+    : sendFailed ? "We couldn’t reach our server. Please check your connection and keep this page open; we’ll retry automatically. If it still fails, reopen this page later on the same device."
+    : "Submitting your answers…";
+  app.innerHTML=`<div class="wrap intro">
+    <h1>Thank you${S.cand?`, ${esc(S.cand.name.split(/\s+/)[0])}`:""}.</h1>
+    <p class="lede">${S.reason==="time"?"Time ran out, so your answers were submitted automatically.":"You submitted your answers before time ran out."}
+    You answered ${answered} of ${Q.length} questions.</p>
+    <p class="lede" role="status" style="color:${S.sent?"var(--green)":sendFailed?"var(--red)":"var(--graphite)"}">${status}</p>
+    <p class="lede">The Hunar.ai team will review your result and get in touch about next steps.</p>
+  </div>`;
+}
+
+function render(){
+  if(S.phase==="test" && remaining()<=0){ finish("time"); return; }
+  if(S.phase==="intro") renderIntro();
+  else if(S.phase==="test") renderTest();
+  else renderDone();
+  clearInterval(ticker);
+  if(S.phase==="test") ticker=setInterval(tick,250);
+}
+sendResult();
+document.addEventListener("keydown",e=>{
+  if(S.phase!=="test"||e.metaKey||e.ctrlKey||e.altKey) return;
+  const k=e.key.toUpperCase(), i=LET.indexOf(k);
+  if(i>=0 && i<Q[S.cur].o.length && k.length===1){ S.answers[S.cur]=i; save(); render(); }
+  else if(e.key==="ArrowRight") go(S.cur+1);
+  else if(e.key==="ArrowLeft") go(S.cur-1);
+});
+render();
+})();
+</script>
+</body>
+</html>
