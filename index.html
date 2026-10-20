@@ -199,6 +199,8 @@ body.testing::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-ar
 const DURATION = 20 * 60 * 1000;
 const KEY = "aptitude-test-v1";
 /* Google Apps Script web app URL (ends in /exec). See aptitude_mailer.gs for setup. */
+/* Bump together with KEY_VERSION in aptitude_mailer.gs whenever questions change. */
+const KEY_VERSION = 2;
 const MAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
 
 /* ---------- drawing helpers ---------- */
@@ -249,9 +251,9 @@ const Q = [
 {cat:"Numerical", t:"Number series",
  p:`<p>What number comes next?</p><div class="seq">2, 6, 12, 20, 30, ?</div>`,
  o:["40","42","44","48"]},
-{cat:"Verbal", t:"Analogy",
- p:`<p><em>Ephemeral</em> is to <em>permanent</em> as <em>verbose</em> is to:</p>`,
- o:["Wordy","Eloquent","Concise","Loud"]},
+{cat:"Probability", t:"Expected value",
+ p:`<p>You roll a fair six-sided die. If it shows an even number, you score that many points. If it shows an odd number, you lose 3 points.</p><p>What is your expected score per roll?</p>`,
+ o:["0","1","−0.5","+0.5"]},
 {cat:"Logical", t:"Syllogism",
  p:`<p>All bloops are razzies. Some razzies are lazzies.</p><p>Which statement <em>must</em> be true?</p>`,
  o:["Some bloops are lazzies","All lazzies are bloops","No bloops are lazzies","None of these must be true"]},
@@ -261,9 +263,9 @@ const Q = [
 {cat:"Numerical", t:"Rates",
  p:`<p>Pipe A fills a tank in 4 hours. Pipe B empties the full tank in 6 hours. With both open, how long does it take to fill the empty tank?</p>`,
  o:["2 hours","5 hours","10 hours","12 hours"]},
-{cat:"Verbal", t:"Odd one out",
- p:`<p>Which word does not belong with the others?</p>`,
- o:["Square","Rhombus","Trapezoid","Kite","Triangle"]},
+{cat:"Probability", t:"Without replacement",
+ p:`<p>A bag holds 3 red balls and 2 blue balls. You draw 2 balls at random without putting the first one back.</p><p>What is the probability that both balls are the same colour?</p>`,
+ o:["2/5","3/10","1/2","13/25"]},
 {cat:"Abstract", t:"Matrix",
  p:`<p>Which cell completes the grid?</p><div class="fig">${matrix()}</div>`,
  o:[matCell("circle",3), matCell("circle",1), matCell("square",2), matCell("circle",2)], visual:true},
@@ -282,9 +284,9 @@ const Q = [
 {cat:"Spatial", t:"Paper folding",
  p:`<p>A square sheet of paper is folded in half, then in half again, then once more along a diagonal into a triangle. One hole is punched through all the layers, away from any fold. How many holes are there when the paper is opened?</p>`,
  o:["4","6","8","16"]},
-{cat:"Verbal", t:"Analogy",
- p:`<p><em>Odometer</em> is to <em>distance</em> as <em>compass</em> is to:</p>`,
- o:["Speed","Direction","Needle","Hiking"]},
+{cat:"Probability", t:"At least one",
+ p:`<p>You roll a fair six-sided die 4 times. What is the probability of getting at least one 6?</p>`,
+ o:["Exactly 2/3","Slightly more than 1/2","Exactly 1/2","Slightly less than 1/2"]},
 {cat:"Numerical", t:"Summation",
  p:`<p>What is the sum of all whole numbers from 1 to 500 that are divisible by 3 or by 7, but <em>not</em> by both?</p>`,
  o:["47,685","47,883","48,216","46,953"]},
@@ -297,9 +299,9 @@ const Q = [
 {cat:"Numerical", t:"Averages",
  p:`<p>The average of five numbers is 20. One number is removed and the average of the remaining four is 18. What number was removed?</p>`,
  o:["22","26","28","30"]},
-{cat:"Verbal", t:"Word links",
- p:`<p>Which word can go in front of each of these to make a common word?</p><div class="seq" style="font-size:24px">___light &nbsp; ___fall &nbsp; ___mare &nbsp; ___club</div>`,
- o:["Night","Day","Star","Moon"]},
+{cat:"Probability", t:"Base rates",
+ p:`<p>A condition affects 1 in 100 people. A test for it gives a positive result for 90% of people who have the condition, and also for 10% of people who don’t.</p><p>A randomly chosen person tests positive. Roughly how likely is it that they have the condition?</p>`,
+ o:["90%","About 50%","About 8%","About 33%"]},
 {cat:"Logical", t:"Syllogism",
  p:`<p>Some A are B. No B are C.</p><p>Which statement <em>must</em> be true?</p>`,
  o:["Some C are B","No A are C","All C are A","Some A are not C"]},
@@ -336,7 +338,7 @@ const Q = [
  o:["10:35","9:25","9:35","3:35"]}
 ];
 const LET="ABCDE";
-const BRAND=`<div class="brand"><b>hunar<i>.</i>ai</b><span>AI Research Fellowship · Round 1</span></div>`;
+const BRAND=`<div class="brand"><b>hunar<i>.</i>ai</b></div>`;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ---------- state ---------- */
@@ -376,7 +378,7 @@ function finish(reason){
 function payload(){
   let tz=""; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
   return {
-    type:"submit", id:S.id, attempt:S.attempt, candidate:S.cand, reason:S.reason,
+    type:"submit", v:KEY_VERSION, id:S.id, attempt:S.attempt, candidate:S.cand, reason:S.reason,
     startedAt:new Date(S.startedAt).toISOString(), finishedAt:new Date(S.finishedAt).toISOString(),
     answers:Q.map((_,i)=>S.answers[i]==null?null:S.answers[i]),
     spent:Q.map((_,i)=>Math.round(S.spent[i]||0)),
@@ -427,7 +429,7 @@ function renderIntro(){
   app.innerHTML=`<div class="wrap intro">
   ${BRAND}
   <h1>Twenty-five questions. Twenty minutes.</h1>
-  <p class="lede">A short reasoning test across numbers, words, logic and shapes. No knowledge is needed beyond basic arithmetic and everyday vocabulary.</p>
+  <p class="lede">A short reasoning test across numbers, logic, chance and shapes. No specialist knowledge is needed beyond basic arithmetic and fractions.</p>
   <div class="facts"><div><b>25</b><span>questions</span></div><div><b>20:00</b><span>hard time limit</span></div><div><b>1</b><span>point each, no penalty for wrong answers</span></div></div>
   <ul class="rules">
     <li>The clock starts when you submit your details below and doesn’t stop. When it reaches zero, your answers are submitted as they are.</li>
