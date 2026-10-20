@@ -210,13 +210,14 @@ const DURATION = 20 * 60 * 1000;
 const KEY = "aptitude-test-v1";
 /* Google Apps Script web app URL (ends in /exec). See aptitude_mailer.gs for setup. */
 /* Bump together with KEY_VERSION in aptitude_mailer.gs whenever questions, timing or scoring change. */
-const KEY_VERSION = 4;
+const KEY_VERSION = 5;
 const MAIL_ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
 
 /* ---------- drawing helpers ---------- */
 const norm = cs => { const mx=Math.min(...cs.map(c=>c[0])), my=Math.min(...cs.map(c=>c[1])); return cs.map(([x,y])=>[x-mx,y-my]); };
 const rot = (cs,k) => { let r=cs; for(let i=0;i<k;i++) r=r.map(([x,y])=>[-y,x]); return norm(r); };
 const mir = cs => norm(cs.map(([x,y])=>[-x,y]));
+const flp = cs => norm(cs.map(([x,y])=>[x,-y]));
 function poly(cs, size){
   size = size || 22; cs = norm(cs);
   const w = Math.max(...cs.map(c=>c[0]))+1, h = Math.max(...cs.map(c=>c[1]))+1;
@@ -224,26 +225,27 @@ function poly(cs, size){
   const rects = cs.map(([x,y])=>`<rect x="${pad+x*size}" y="${padY+y*size}" width="${size}" height="${size}" fill="var(--cobalt)" stroke="var(--sheet)" stroke-width="2"/>`).join("");
   return `<svg class="sq" viewBox="0 0 ${W} ${W}" width="${W}" height="${W}" role="img" aria-label="shape">${rects}</svg>`;
 }
-function shapeAt(kind, cx, cy, r){
-  if(kind==="circle") return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--ink)"/>`;
-  if(kind==="square") return `<rect x="${cx-r}" y="${cy-r}" width="${2*r}" height="${2*r}" fill="var(--ink)"/>`;
-  return `<polygon points="${cx},${cy-r} ${cx+r},${cy+r*.85} ${cx-r},${cy+r*.85}" fill="var(--ink)"/>`;
+function shapeAt(kind, cx, cy, r, hollow){
+  const paint = hollow ? `fill="none" stroke="var(--ink)" stroke-width="2.5"` : `fill="var(--ink)"`;
+  if(kind==="circle") return `<circle cx="${cx}" cy="${cy}" r="${r}" ${paint}/>`;
+  if(kind==="square") return `<rect x="${cx-r}" y="${cy-r}" width="${2*r}" height="${2*r}" ${paint}/>`;
+  return `<polygon points="${cx},${cy-r} ${cx+r},${cy+r*.85} ${cx-r},${cy+r*.85}" ${paint}/>`;
 }
-function cellContent(kind, n, ox, oy, S){
+function cellContent(kind, n, ox, oy, S, hollow){
   const r = S*0.11, xs = n===1?[.5]:n===2?[.32,.68]:[.2,.5,.8];
-  return xs.map(f=>shapeAt(kind, ox+f*S, oy+S/2, r)).join("");
+  return xs.map(f=>shapeAt(kind, ox+f*S, oy+S/2, r, hollow)).join("");
 }
 function matrix(){
-  const S=90, data=[[["circle",1],["square",2],["triangle",3]],[["triangle",2],["circle",3],["square",1]],[["square",3],["triangle",1],null]];
+  const S=90, data=[[["triangle",2,0],["circle",3,1],["square",1,0]],[["circle",1,1],["square",2,0],["triangle",3,0]],[["square",3,0],["triangle",1,0],null]];
   let out=`<svg viewBox="0 0 ${3*S+4} ${3*S+4}" width="${3*S+4}" height="${3*S+4}" class="sq" role="img" aria-label="3 by 3 grid with the last cell missing">`;
   data.forEach((row,ri)=>row.forEach((c,ci)=>{
     const x=2+ci*S, y=2+ri*S;
     out+=`<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="var(--sheet)" stroke="var(--rule)" stroke-width="2"/>`;
-    out+= c ? cellContent(c[0],c[1],x,y,S) : `<text x="${x+S/2}" y="${y+S/2+12}" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-size="36" fill="var(--graphite)">?</text>`;
+    out+= c ? cellContent(c[0],c[1],x,y,S,c[2]) : `<text x="${x+S/2}" y="${y+S/2+12}" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-size="36" fill="var(--graphite)">?</text>`;
   }));
   return out+"</svg>";
 }
-function matCell(kind,n){ const S=90; return `<svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}"><rect x="1" y="1" width="${S-2}" height="${S-2}" fill="none" stroke="var(--rule)" stroke-width="2"/>${cellContent(kind,n,0,0,S)}</svg>`; }
+function matCell(kind,n,hollow){ const S=90; return `<svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}"><rect x="1" y="1" width="${S-2}" height="${S-2}" fill="none" stroke="var(--rule)" stroke-width="2"/>${cellContent(kind,n,0,0,S,hollow)}</svg>`; }
 function frame(dir, filled, q){
   const s=70;
   if(q) return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}"><rect x="2" y="2" width="${s-4}" height="${s-4}" rx="4" fill="none" stroke="var(--graphite)" stroke-width="2" stroke-dasharray="5 4"/><text x="${s/2}" y="${s/2+11}" text-anchor="middle" font-family="Newsreader, Georgia, serif" font-size="30" fill="var(--graphite)">?</text></svg>`;
@@ -253,74 +255,74 @@ function frame(dir, filled, q){
 }
 const row = items => `<div class="fig"><svg viewBox="0 0 ${items.length*80} 70" width="${items.length*80}" height="70">${items.map((it,i)=>`<g transform="translate(${i*80} 0)">${it.replace(/^<svg[^>]*>|<\/svg>$/g,"")}</g>`).join("")}</svg></div>`;
 
-const F=[[1,0],[2,0],[0,1],[1,1],[1,2]];
-const H=[[0,0],[1,0],[1,1],[1,2],[2,2],[1,3]];
+const F=[[0,0],[1,0],[1,1],[2,1],[3,1],[2,2]];
+const H=[[0,0],[1,0],[2,0],[2,1],[1,2],[1,3]];
 
 /* ---------- questions ---------- */
 const Q = [
 {cat:"Numerical", t:"Number series",
- p:`<p>What number comes next?</p><div class="seq">2, 6, 12, 20, 30, ?</div>`,
- o:["40","42","44","48"]},
+ p:`<p>What number comes next?</p><div class="seq">2, 3, 7, 16, 32, 57, ?</div>`,
+ o:["82","89","93","98"]},
 {cat:"Probability", t:"Expected value",
- p:`<p>You roll a fair six-sided die. If it shows an even number, you score that many points. If it shows an odd number, you lose 3 points.</p><p>What is your expected score per roll?</p>`,
- o:["0","1","−0.5","+0.5"]},
+ p:`<p>You roll two fair dice. If the total is 7, you score 10 points. If you roll a double, you score 5 points. Otherwise, you lose 2 points.</p><p>What is your expected score per roll?</p>`,
+ o:["+1/2","+7/6","−1/3","+5/3"]},
 {cat:"Logical", t:"Syllogism",
- p:`<p>All bloops are razzies. Some razzies are lazzies.</p><p>Which statement <em>must</em> be true?</p>`,
- o:["Some bloops are lazzies","All lazzies are bloops","No bloops are lazzies","None of these must be true"]},
+ p:`<p>All bloops are razzies. No razzies are lazzies. Some lazzies are tazzies.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["Some tazzies are not bloops","No bloops are tazzies","Some razzies are tazzies","No tazzies are razzies"]},
 {cat:"Spatial", t:"Rotation",
  p:`<p>Three of the options are this shape turned in the plane. Which one can <em>not</em> be made by rotating it?</p><div class="fig">${poly(F)}</div>`,
- o:[poly(rot(F,1)), poly(mir(rot(F,2))), poly(rot(F,3)), poly(rot(F,2))], visual:true},
+ o:[poly(rot(F,1)), poly(rot(F,3)), poly(mir(rot(F,1))), poly(rot(F,2))], visual:true},
 {cat:"Numerical", t:"Rates",
- p:`<p>Pipe A fills a tank in 4 hours. Pipe B empties the full tank in 6 hours. With both open, how long does it take to fill the empty tank?</p>`,
- o:["2 hours","5 hours","10 hours","12 hours"]},
+ p:`<p>Pipe A fills a tank in 5 hours and pipe B fills it in 4 hours. Pipe C empties the full tank in 10 hours. All three are opened together on an empty tank.</p><p>About how long does it take to fill?</p>`,
+ o:["2 h 13 min","2 h 51 min","3 h 20 min","4 h 30 min"]},
 {cat:"Probability", t:"Without replacement",
- p:`<p>A bag holds 3 red balls and 2 blue balls. You draw 2 balls at random without putting the first one back.</p><p>What is the probability that both balls are the same colour?</p>`,
- o:["2/5","3/10","1/2","13/25"]},
+ p:`<p>A bag holds 4 red balls and 3 blue balls. You draw 3 balls at random without putting any back.</p><p>What is the probability that exactly 2 of them are red?</p>`,
+ o:["4/7","144/343","18/35","12/35"]},
 {cat:"Abstract", t:"Matrix",
  p:`<p>Which cell completes the grid?</p><div class="fig">${matrix()}</div>`,
- o:[matCell("circle",3), matCell("circle",1), matCell("square",2), matCell("circle",2)], visual:true},
+ o:[matCell("circle",2,0), matCell("square",2,1), matCell("circle",3,1), matCell("circle",2,1)], visual:true},
 {cat:"Verbal", t:"Coding",
- p:`<p>In a code, <strong>MOUSE</strong> is written as <strong>NQXWJ</strong>. How is <strong>HORSE</strong> written?</p>`,
- o:["IPTVF","IQUWJ","JQUWJ","IQUVJ"]},
+ p:`<p>In a code, <strong>PLANT</strong> is written as <strong>QKCLW</strong>. How is <strong>GRAPE</strong> written?</p>`,
+ o:["HTDTJ","HQCNH","IQCNH","HQCNG"]},
 {cat:"Numerical", t:"Number series",
- p:`<p>What number comes next?</p><div class="seq">3, 5, 9, 17, 33, ?</div>`,
- o:["49","63","66","65"]},
+ p:`<p>What number comes next?</p><div class="seq">3, 4, 10, 33, 136, ?</div>`,
+ o:["550","681","685","816"]},
 {cat:"Logical", t:"Ordering",
- p:`<p>Five runners finish a race with no ties. Anna finishes before Ben. Carl finishes after Dana but before Anna. Eve finishes after Ben.</p><p>Who finishes third?</p>`,
- o:["Dana","Carl","Anna","Ben"]},
+ p:`<p>Six runners finish a race with no ties. Finn finishes before Carl, and Carl finishes before Anna. Dana finishes exactly three places ahead of Anna. Eve finishes immediately before Ben, and Ben finishes after Anna.</p><p>Who finishes second?</p>`,
+ o:["Dana","Finn","Carl","Eve"]},
 {cat:"Spatial", t:"Visualisation",
- p:`<p>A 4 × 4 × 4 cube is painted on every face, then cut into 64 small cubes. How many small cubes have paint on <em>exactly one</em> face?</p>`,
- o:["16","24","32","36"]},
+ p:`<p>A 3 × 4 × 5 block is painted on every face, then cut into 60 small 1 × 1 × 1 cubes. How many small cubes have paint on <em>exactly one</em> face?</p>`,
+ o:["22","24","26","30"]},
 {cat:"Spatial", t:"Paper folding",
- p:`<p>A square sheet of paper is folded in half, then in half again, then once more along a diagonal into a triangle. One hole is punched through all the layers, away from any fold. How many holes are there when the paper is opened?</p>`,
- o:["4","6","8","16"]},
+ p:`<p>A square sheet of paper is folded in half, then in half again, making a smaller square. The corner of this small square where both folds meet (the centre of the original sheet) is cut off. How many holes are there when the paper is unfolded?</p>`,
+ o:["4","1","8","2"]},
 {cat:"Probability", t:"At least one",
- p:`<p>You roll a fair six-sided die 4 times. What is the probability of getting at least one 6?</p>`,
- o:["Exactly 2/3","Slightly more than 1/2","Exactly 1/2","Slightly less than 1/2"]},
+ p:`<p>Three people are chosen at random. Assume each is equally likely to have been born on any day of the week.</p><p>What is the probability that at least two of them were born on the same day of the week?</p>`,
+ o:["1/7","3/7","6/49","19/49"]},
 {cat:"Numerical", t:"Summation",
- p:`<p>What is the sum of all whole numbers from 1 to 500 that are divisible by 3 or by 7, but <em>not</em> by both?</p>`,
- o:["47,685","47,883","48,216","46,953"]},
+ p:`<p>What is the sum of all whole numbers from 1 to 600 that are divisible by 4 or by 6, but <em>not</em> by both?</p>`,
+ o:["60,000","60,300","45,000","44,700"]},
 {cat:"Spatial", t:"Clock",
- p:`<p>What is the smaller angle between the hour and minute hands of a clock at 3:40?</p>`,
- o:["120°","125°","130°","140°"]},
+ p:`<p>What is the smaller angle between the hour and minute hands of a clock at 7:38?</p>`,
+ o:["0°","1°","11°","19°"]},
 {cat:"Spatial", t:"Transformation",
- p:`<p>This shape is rotated 90° clockwise, then flipped left to right. Which option shows the result?</p><div class="fig">${poly(H)}</div>`,
- o:[poly(rot(H,1)), poly(mir(rot(H,3))), poly(mir(rot(H,1))), poly(mir(H))], visual:true},
+ p:`<p>This shape is rotated 90° clockwise, then flipped left to right, then rotated 90° clockwise again. Which option shows the result?</p><div class="fig">${poly(H)}</div>`,
+ o:[poly(flp(H)), poly(rot(H,2)), poly(mir(H)), poly(rot(H,1))], visual:true},
 {cat:"Numerical", t:"Averages",
- p:`<p>The average of five numbers is 20. One number is removed and the average of the remaining four is 18. What number was removed?</p>`,
- o:["22","26","28","30"]},
+ p:`<p>A class of 30 students has an average mark of 70. The 10 students in the science stream have an average of 85. What is the average mark of the other 20 students?</p>`,
+ o:["62.5","55","65","60"]},
 {cat:"Probability", t:"Base rates",
- p:`<p>A condition affects 1 in 100 people. A test for it gives a positive result for 90% of people who have the condition, and also for 10% of people who don’t.</p><p>A randomly chosen person tests positive. Roughly how likely is it that they have the condition?</p>`,
- o:["90%","About 50%","About 8%","About 33%"]},
+ p:`<p>A condition affects 1 in 100 people. A test for it gives a positive result for 90% of people who have the condition, and also for 10% of people who don’t. Repeat tests on the same person are independent.</p><p>A randomly chosen person takes the test twice and tests positive both times. Roughly how likely is it that they have the condition?</p>`,
+ o:["About 81%","About 17%","About 8%","About 45%"]},
 {cat:"Logical", t:"Syllogism",
- p:`<p>Some A are B. No B are C.</p><p>Which statement <em>must</em> be true?</p>`,
- o:["Some C are B","No A are C","All C are A","Some A are not C"]},
+ p:`<p>No A are B. Some C are A. All D are B.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["No C are D","Some D are not C","Some C are not D","No A are C"]},
 {cat:"Abstract", t:"Sequence",
- p:`<p>Which frame comes next?</p>${row([frame(0,1),frame(1,0),frame(2,1),frame(3,0),frame(0,0,true)])}`,
- o:[frame(0,0), frame(1,1), frame(0,1), frame(3,1)], visual:true},
+ p:`<p>Which frame comes next?</p>${row([frame(0,1),frame(1,1),frame(3,0),frame(2,1),frame(2,1),frame(0,0,true)])}`,
+ o:[frame(2,0), frame(3,0), frame(3,1), frame(0,0)], visual:true},
 {cat:"Numerical", t:"Number series",
- p:`<p>What number comes next?</p><div class="seq">1, 4, 27, 256, ?</div>`,
- o:["625","1,024","4,096","3,125"]},
+ p:`<p>What number comes next?</p><div class="seq">2, 12, 36, 80, 150, ?</div>`,
+ o:["294","240","224","252"]},
 {cat:"Logical", t:"Deduction",
  p:`<p>Four friends (Ali, Bea, Cy and Di) live in four houses in a row, numbered 1 to 4 from left to right. Each house is a different colour (red, blue, green, yellow) and each friend owns a different pet (cat, dog, fish, bird).</p>
  <ol class="clues">
@@ -338,14 +340,14 @@ const Q = [
  </ol><p>Who owns the bird?</p>`,
  o:["Ali","Bea","Cy","Di"]},
 {cat:"Numerical", t:"Ages",
- p:`<p>A is twice as old as B was when A was as old as B is now. B is 30. How old is A?</p>`,
- o:["35","40","45","60"]},
+ p:`<p>Five years ago, Asha was three times as old as her brother. In five years, she will be twice as old as him. How old is Asha now?</p>`,
+ o:["45","40","35","30"]},
 {cat:"Verbal", t:"Inference",
- p:`<p>All of the museum’s 19th-century paintings hang in the east wing. Some paintings in the east wing are by Dutch artists. The painting “Harbor” hangs in the west wing.</p><p>Which statement <em>must</em> be true?</p>`,
- o:["“Harbor” is by a Dutch artist","“Harbor” is not a 19th-century painting","“Harbor” is not by a Dutch artist","Every Dutch painting is from the 19th century"]},
+ p:`<p>Every 19th-century painting in the museum hangs in the east wing. Every painting in the east wing is insured. Some insured paintings are by Dutch artists. The painting “Harbor” is not insured.</p><p>Which statement <em>must</em> be true?</p>`,
+ o:["“Harbor” hangs in the east wing","Some Dutch paintings are from the 19th century","“Harbor” is not by a Dutch artist","“Harbor” is not a 19th-century painting"]},
 {cat:"Spatial", t:"Mirror image",
- p:`<p>An analogue clock seen in a mirror appears to read 2:25. What is the actual time?</p>`,
- o:["10:35","9:25","9:35","3:35"]}
+ p:`<p>An analogue clock seen in a mirror appears to read 4:50. What will the actual time be 25 minutes from now?</p>`,
+ o:["7:35","7:10","8:35","5:15"]}
 ];
 const LET="ABCDE";
 const BRAND=`<div class="brand"><b>hunar<i>.</i>ai</b></div>`;
