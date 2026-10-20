@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aptitude test results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9EDF1; --sheet:#F8FAFB; --ink:#18212C; --graphite:#5A6573; --rule:#CBD3DC;
+  --cobalt:#2A44C9; --cobalt-soft:#DCE2FA; --red:#B3261E;
+  --serif:"Newsreader", Georgia, serif;
+  --sans:"Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --paper:#0F1318; --sheet:#171C23; --ink:#E3E8EE; --graphite:#94A0AE; --rule:#2A323D; --cobalt:#8DA0FF; --cobalt-soft:#232C4D; --red:#FF7A70; color-scheme:dark; }
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:28px max(20px,env(safe-area-inset-right,0px)) 64px max(20px,env(safe-area-inset-left,0px))}
+.brand b{font-weight:700;letter-spacing:-.01em;font-size:17px}
+.brand b i{font-style:normal;color:var(--cobalt)}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(36px,6vw,52px);line-height:1.05;letter-spacing:-.02em;margin:40px 0 24px}
+.lock{max-width:22em}
+.lock label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+.lock .row{display:flex;gap:10px}
+.lock input{flex:1;min-width:0;background:var(--sheet);border:1.5px solid var(--rule);border-radius:6px;padding:11px 13px}
+.lock input:focus{border-color:var(--cobalt);outline:none;box-shadow:0 0 0 3px var(--cobalt-soft)}
+.err{color:var(--red);font-size:14px;margin-top:8px;min-height:1.5em}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);background:var(--ink);color:var(--sheet);padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none;font-size:15px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:progress}
+@media (hover:hover){ .btn:not(:disabled):hover{background:var(--cobalt);border-color:var(--cobalt);color:#fff} }
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.toolbar .count{color:var(--graphite)}
+.toolbar .grp{display:flex;gap:8px;flex-wrap:wrap}
+.tblwrap{overflow-x:auto;background:var(--sheet);border:1.5px solid var(--rule);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+th{color:var(--graphite);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:uppercase;background:var(--paper)}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.num b{font-weight:700}
+td .out{color:var(--graphite)}
+th button{all:unset;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+th button:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:3px}
+th button .arrow{display:inline-block;width:10px;color:var(--rule)}
+th[aria-sort] button{color:var(--ink)}
+th[aria-sort] button .arrow{color:var(--cobalt)}
+td a{color:var(--cobalt);text-decoration:none}
+td a:hover{text-decoration:underline}
+.empty{padding:28px 14px;color:var(--graphite);text-align:center}
+/* phones: one card per candidate, score and time beside the name, sort buttons kept in the header strip */
+@media (max-width:640px){
+  table,thead,tbody{display:block}
+  thead tr{display:flex;justify-content:flex-end;gap:18px;padding:10px 14px;background:var(--paper);border-bottom:1px solid var(--rule)}
+  th{padding:0;border:0;background:none}
+  th:not(.num){display:none}
+  tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:2px 14px;padding:12px 14px;border-bottom:1px solid var(--rule)}
+  tbody tr:last-child{border-bottom:0}
+  td{padding:0;border:0;white-space:normal;overflow-wrap:anywhere}
+  td:nth-child(1){grid-area:1/1;font-weight:600}
+  td:nth-child(4){grid-area:1/2}
+  td:nth-child(5){grid-area:1/3}
+  td:nth-child(2),td:nth-child(3){grid-column:1/-1;font-size:14px}
+  td.empty{grid-column:1/-1}
+}
+.muted{color:var(--graphite)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><b>hunar<i>.</i>ai</b></div>
+  <h1>Aptitude test results</h1>
+  <div id="app"></div>
+</div>
+<script>
+(function(){
+/* Same Apps Script as the test. The password is checked there; nothing secret lives in this page. */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbyNzjpI-RockyyR70zb-mtq-lILODPkMRNr4kYlZSg1bmbtF_-VjxZeuRD3i0Q4QcvR9g/exec";
+const PW_KEY = "aptitude-results-pw";
+const app = document.getElementById("app");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mmss = sec => { sec = Math.max(0, Math.round(sec || 0)); return Math.floor(sec/60) + ":" + String(sec%60).padStart(2,"0"); };
+let rows = [], sheetUrl = null, sort = {key:"score", dir:"desc"};
+
+// Only real LinkedIn URLs become links; anything else a candidate typed is shown as plain text.
+function linkedin(v){
+  const raw = String(v || "").trim(); if(!raw) return '<span class="muted">-</span>';
+  const url = /^https?:\/\//i.test(raw) ? raw : "https://" + raw;
+  if(!/^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/(in|pub)\/[^\s"'<>]+$/i.test(url.replace(/^http:/i,"https:"))) return esc(raw);
+  const label = url.replace(/^https?:\/\/([a-z]{2,3}\.)?linkedin\.com/i, "").replace(/\/$/, "");
+  return '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + '</a>';
+}
+
+function api(password){
+  return fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({type:"results", password})})
+    .then(r => r.json());
+}
+
+function showLock(msg){
+  app.innerHTML = `<form class="lock" id="lock">
+    <label for="pw">Password</label>
+    <div class="row"><input id="pw" type="password" autocomplete="current-password" required><button class="btn" id="go">Open</button></div>
+    <div class="err" role="alert">${esc(msg || "")}</div></form>`;
+  const pw = document.getElementById("pw"); pw.focus();
+  document.getElementById("lock").onsubmit = e => { e.preventDefault(); if(pw.value) load(pw.value, true); };
+}
+
+function load(password, fromForm){
+  const btn = document.getElementById(fromForm ? "go" : "refresh"); if(btn){ btn.disabled = true; btn.textContent = "Loading…"; }
+  api(password).then(res => {
+    if(!res.ok){
+      sessionStorage.removeItem(PW_KEY);
+      showLock(res.error === "locked" ? "Too many wrong attempts. Try again in 10 minutes." : "That password isn’t right.");
+      return;
+    }
+    sessionStorage.setItem(PW_KEY, password);
+    rows = res.rows; sheetUrl = res.sheetUrl; renderTable();
+  }).catch(() => {
+    if(fromForm || !rows.length) showLock("Couldn’t reach the results server. Check your connection and try again.");
+    else if(btn){ btn.disabled = false; btn.textContent = "Refresh"; }
+  });
+}
+
+function sorted(){
+  const d = sort.dir === "asc" ? 1 : -1;
+  const by = { score: (a,b) => d*(a.score-b.score) || a.timeSec-b.timeSec,
+               time:  (a,b) => d*(a.timeSec-b.timeSec) || b.score-a.score };
+  return rows.slice().sort(by[sort.key]);
+}
+
+function th(key, label){
+  const on = sort.key === key, arrow = on ? (sort.dir === "asc" ? "▲" : "▼") : "↕";
+  return `<th class="num"${on ? ` aria-sort="${sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button data-sort="${key}">${label}<span class="arrow" aria-hidden="true">${arrow}</span></button></th>`;
+}
+
+function renderTable(){
+  const body = sorted().map(r => `<tr>
+      <td>${esc(r.name)}</td>
+      <td>${r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '<span class="muted">-</span>'}</td>
+      <td>${linkedin(r.linkedin)}</td>
+      <td class="num"><b>${r.score}</b> <span class="out">/ ${r.total}</span></td>
+      <td class="num">${mmss(r.timeSec)}</td></tr>`).join("");
+  app.innerHTML = `<div class="toolbar">
+      <span class="count">${rows.length} submission${rows.length === 1 ? "" : "s"}</span>
+      <div class="grp">
+        ${sheetUrl ? `<a class="btn ghost" href="${esc(sheetUrl)}" target="_blank" rel="noopener">Open full sheet</a>` : ""}
+        <button class="btn ghost" id="refresh">Refresh</button>
+        <button class="btn ghost" id="signout">Lock</button>
+      </div></div>
+    <div class="tblwrap"><table>
+      <thead><tr><th>Name</th><th>Email</th><th>LinkedIn</th>${th("score","Score")}${th("time","Time taken")}</tr></thead>
+      <tbody>${body || '<tr><td colspan="5" class="empty">No submissions yet.</td></tr>'}</tbody>
+    </table></div>`;
+  app.querySelectorAll("[data-sort]").forEach(b => b.onclick = () => {
+    const k = b.dataset.sort;
+    sort = sort.key === k ? {key:k, dir: sort.dir === "asc" ? "desc" : "asc"} : {key:k, dir: k === "score" ? "desc" : "asc"};
+    renderTable();
+    app.querySelector(`[data-sort="${k}"]`).focus();
+  });
+  document.getElementById("refresh").onclick = () => load(sessionStorage.getItem(PW_KEY), false);
+  document.getElementById("signout").onclick = () => { sessionStorage.removeItem(PW_KEY); rows = []; showLock(); };
+}
+
+const saved = sessionStorage.getItem(PW_KEY);
+if(saved){ app.innerHTML = '<p class="muted">Loading…</p>'; load(saved, false); } else showLock();
+})();
+</script>
+</body>
+</html>
