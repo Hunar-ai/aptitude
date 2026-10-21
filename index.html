@@ -355,12 +355,13 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 
 /* ---------- state ---------- */
 function fresh(){ return {phase:"intro", cand:null, startedAt:null, finishedAt:null, answers:{}, flags:{}, spent:{}, cur:0, viewStart:null, reason:null,
-  id:null, attempt:0, away:{n:0,ms:0}, hiddenAt:null, reloads:0, sent:false, result:null}; }
+  id:null, attempt:0, away:{n:0,ms:0}, hiddenAt:null, reloads:0, sent:false, result:null, engaged:false}; }
 function load(){ try{ const v=localStorage.getItem(KEY); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = Object.assign(fresh(), load() || {});
 let ticker=null, confirmArm=false, sending=false, sendFailed=false;
 if(S.phase==="test"){
+  setTimeout(()=>scheduleEngaged(),0);
   S.reloads++;
   if(S.hiddenAt){ S.away.ms+=Date.now()-S.hiddenAt; S.hiddenAt=null; }
   save();
@@ -378,6 +379,24 @@ function start(cand){
   S.attempt=attempts+1; S.id=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);
   save(); render();
   post({type:"start", id:S.id}).catch(()=>{});
+  scheduleEngaged();
+}
+
+/* After a minute on the test, record the attempt on the results sheet, so starting over in a new
+   window doesn't go unnoticed. Opening the test and closing it straight away records nothing. */
+const ENGAGED_AFTER = 60 * 1000;
+let engagedTimer=null;
+function scheduleEngaged(delay){
+  clearTimeout(engagedTimer);
+  if(S.phase!=="test"||S.engaged) return;
+  engagedTimer=setTimeout(sendEngaged, delay!=null ? delay : Math.max(0, ENGAGED_AFTER-(Date.now()-S.startedAt)));
+}
+function sendEngaged(){
+  if(S.phase!=="test"||S.engaged) return;
+  post({type:"engaged", v:KEY_VERSION, id:S.id, candidate:S.cand})
+    .then(r=>r.json())
+    .then(res=>{ if(!res||!res.ok) throw new Error("rejected"); S.engaged=true; save(); })
+    .catch(()=>scheduleEngaged(30000));
 }
 function finish(reason){
   bank(); S.viewStart=null; S.phase="done"; S.reason=reason;
@@ -417,7 +436,7 @@ function sendResult(){
     .catch(()=>{ sendFailed=true; })
     .finally(()=>{ sending=false; if(S.phase==="done") render(); });
 }
-window.addEventListener("online", sendResult);
+window.addEventListener("online", ()=>{ sendResult(); if(S.phase==="test"&&!S.engaged) scheduleEngaged(0); });
 document.addEventListener("visibilitychange",()=>{
   if(S.phase!=="test") return;
   if(document.hidden){ S.away.n++; S.hiddenAt=Date.now(); }
